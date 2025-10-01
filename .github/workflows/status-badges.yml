@@ -1,0 +1,31 @@
+name: Update Status Badges
+
+on:
+  workflow_run:
+    workflows: ["Build and Deploy to GitHub Pages", "Pull Request Checks"]
+    types:
+      - completed
+
+jobs:
+  update-badges:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    
+    steps:
+      - name: Update deployment status
+        if: github.event.workflow_run.name == 'Build and Deploy to GitHub Pages'
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "✅ Deployment successful - Badge should show passing"
+          else
+            echo "❌ Deployment failed - Badge should show failing"
+          fi
+          
+      - name: Update test status
+        if: github.event.workflow_run.name == 'Pull Request Checks'
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "✅ Tests passed - Badge should show passing"
+          else
+            echo "❌ Tests failed - Badge should show failing"
+          fi
