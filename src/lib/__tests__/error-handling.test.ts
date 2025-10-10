@@ -137,7 +137,7 @@ describe('Error Handling Utilities', () => {
     it('removes event handlers', () => {
       const input = 'onclick="alert()" onload="hack()"';
       const result = sanitizeInput(input);
-      expect(result).toBe(' ');
+      expect(result).toBe('');
     });
 
     it('trims and limits length', () => {

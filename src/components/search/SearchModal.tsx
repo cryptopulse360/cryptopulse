@@ -216,12 +216,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           className="flex items-start justify-center min-h-screen pt-16 px-4 pb-20 text-center sm:block sm:p-0"
         >
         {/* Background overlay */}
-        <div data-testid="search-backdrop" className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+        <div 
+          data-testid="search-backdrop" 
+          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          onClick={handleBackdropClick}
+        />
 
         {/* Modal panel */}
         <div 
           ref={modalRef}
           className="inline-block align-bottom bg-white dark:bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="bg-white dark:bg-gray-900 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -251,9 +256,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   value={query}
   onChange={handleQueryChange}
   onSubmit={handleSubmit}
-  autoFocus
-  aria-keyshortcuts="Enter: Select, ArrowUp: Previous, ArrowDown: Next, Esc: Close"
-  role="searchbox"
+  autoFocus={isOpen}
 />
             </div>
           </div>

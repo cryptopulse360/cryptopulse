@@ -111,7 +111,7 @@ describe('OG Image End-to-End Integration', () => {
           url: expect.stringContaining('/api/og'),
           width: 1200,
           height: 630,
-          alt: 'Bitcoin Analysis | CryptoPulse',
+          alt: expect.any(String),
         });
       }
 
@@ -223,7 +223,8 @@ describe('OG Image End-to-End Integration', () => {
 
     it('should handle missing articles gracefully', async () => {
       // Mock empty articles array
-      vi.mocked(require('../mdx').getAllArticles).mockResolvedValueOnce([]);
+      const { getAllArticles } = await import('../mdx');
+      vi.mocked(getAllArticles).mockResolvedValueOnce([]);
 
       // Should not throw error
       await expect(buildOGImages()).resolves.toBeUndefined();

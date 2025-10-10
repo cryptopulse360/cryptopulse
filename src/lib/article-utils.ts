@@ -1,4 +1,5 @@
 import { Article } from '@/types/article';
+import { getArticleBySlug, getAllArticles } from './mdx';
 
 /**
  * Sort articles by different criteria
@@ -161,13 +162,65 @@ export function getHomePageArticles(articles: Article[]) {
 }
 
 /**
- * Get related articles based on tags with improved scoring algorithm
+ * Get related articles based on tags (overloaded function)
  */
 export function getRelatedArticles(
-  currentArticle: Article, 
-  allArticles: Article[], 
-  limit: number = 3
+  currentSlugOrArticle: string | Article, 
+  allArticlesOrMaxResults?: Article[] | number,
+  limit?: number
 ): Article[] {
+  // Handle the case where we get a slug and maxResults
+  if (typeof currentSlugOrArticle === 'string') {
+    const maxResults = typeof allArticlesOrMaxResults === 'number' ? allArticlesOrMaxResults : 3;
+    return getRelatedArticlesBySlug(currentSlugOrArticle, maxResults);
+  }
+  
+  // Handle the case where we get an Article object and array of articles
+  if (typeof currentSlugOrArticle === 'object' && Array.isArray(allArticlesOrMaxResults)) {
+    const maxResults = typeof limit === 'number' ? limit : 3;
+    return getRelatedArticlesByArticle(currentSlugOrArticle, allArticlesOrMaxResults, maxResults);
+  }
+  
+  console.warn('getRelatedArticles: Invalid parameters provided');
+  return [];
+}
+
+/**
+ * Get related articles by slug
+ */
+function getRelatedArticlesBySlug(
+  currentSlug: string, 
+  maxResults: number = 3
+): Article[] {
+  // Use the imported mdx functions
+  
+  // Input validation
+  if (typeof currentSlug !== 'string' || !currentSlug.trim()) {
+    console.warn('getRelatedArticles: currentSlug must be a non-empty string');
+    return [];
+  }
+  
+  if (typeof maxResults !== 'number' || maxResults < 0) {
+    console.warn('getRelatedArticles: maxResults must be a non-negative number');
+    maxResults = 3;
+  }
+  
+  // Get the current article
+  const currentArticle = getArticleBySlug(currentSlug);
+  if (!currentArticle) {
+    console.warn(`getRelatedArticles: Article with slug "${currentSlug}" not found`);
+    return [];
+  }
+  
+  // Get all articles
+  const allArticles = getAllArticles();
+  
+  // Validate that allArticles is an array
+  if (!Array.isArray(allArticles)) {
+    console.warn('getRelatedArticles: getAllArticles did not return an array:', typeof allArticles);
+    return [];
+  }
+  
   // Filter out the current article
   const otherArticles = allArticles.filter(article => article.slug !== currentArticle.slug);
   
@@ -175,7 +228,7 @@ export function getRelatedArticles(
     return [];
   }
   
-  // Score articles based on multiple factors
+  // Score articles based on multiple factors, but only consider articles with shared tags
   const scoredArticles = otherArticles.map(article => {
     let score = 0;
     
@@ -185,30 +238,135 @@ export function getRelatedArticles(
         currentTag.toLowerCase() === tag.toLowerCase()
       )
     );
-    score += sharedTags.length * 10; // Weight shared tags heavily
     
-    // Author similarity bonus
-    if (article.author.toLowerCase() === currentArticle.author.toLowerCase()) {
-      score += 5;
+    // Only score articles that have shared tags
+    if (sharedTags.length > 0) {
+      score += sharedTags.length * 10; // Weight shared tags heavily
+      
+      // Author similarity bonus
+      if (article.author.toLowerCase() === currentArticle.author.toLowerCase()) {
+        score += 5;
+      }
+      
+      // Category similarity bonus
+      if (article.category && currentArticle.category && 
+          article.category.toLowerCase() === currentArticle.category.toLowerCase()) {
+        score += 3;
+      }
+      
+      // Recency bonus (newer articles get slight preference)
+      const daysDiff = Math.abs(
+        (article.publishedAt.getTime() - currentArticle.publishedAt.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (daysDiff <= 30) {
+        score += Math.max(0, 2 - (daysDiff / 15)); // Bonus decreases over 30 days
+      }
+      
+      // Featured article bonus
+      if (article.featured) {
+        score += 1;
+      }
     }
     
-    // Category similarity bonus
-    if (article.category && currentArticle.category && 
-        article.category.toLowerCase() === currentArticle.category.toLowerCase()) {
-      score += 3;
-    }
+    return {
+      article,
+      score,
+      sharedTagCount: sharedTags.length,
+    };
+  });
+
+  // Sort by score (highest first), then by shared tags, then by date
+  const sortedByScore = scoredArticles
+    .sort((a, b) => {
+      if (Math.abs(a.score - b.score) < 0.1) {
+        // If scores are very close, prefer more shared tags
+        if (a.sharedTagCount !== b.sharedTagCount) {
+          return b.sharedTagCount - a.sharedTagCount;
+        }
+        // If same shared tags, prefer newer articles
+        return b.article.publishedAt.getTime() - a.article.publishedAt.getTime();
+      }
+      return b.score - a.score;
+    });
+
+  // Get articles with any score > 0 (only articles with shared tags)
+  const relatedWithScore = sortedByScore
+    .filter(item => item.score > 0)
+    .map(item => item.article);
+
+  return relatedWithScore.slice(0, maxResults);
+}
+
+/**
+ * Get related articles by Article object and array of all articles
+ */
+function getRelatedArticlesByArticle(
+  currentArticle: Article, 
+  allArticles: Article[], 
+  limit: number = 3
+): Article[] {
+  // Input validation
+  if (!currentArticle || typeof currentArticle !== 'object') {
+    console.warn('getRelatedArticlesByArticle: currentArticle must be a valid Article object');
+    return [];
+  }
+  
+  // Validate that allArticles is an array
+  if (!Array.isArray(allArticles)) {
+    console.warn('getRelatedArticlesByArticle: allArticles must be an array:', typeof allArticles);
+    return [];
+  }
+  
+  if (typeof limit !== 'number' || limit < 0) {
+    console.warn('getRelatedArticlesByArticle: limit must be a non-negative number');
+    limit = 3;
+  }
+  
+  // Filter out the current article
+  const otherArticles = allArticles.filter(article => article.slug !== currentArticle.slug);
+  
+  if (otherArticles.length === 0) {
+    return [];
+  }
+  
+  // Score articles based on multiple factors, but only consider articles with shared tags
+  const scoredArticles = otherArticles.map(article => {
+    let score = 0;
     
-    // Recency bonus (newer articles get slight preference)
-    const daysDiff = Math.abs(
-      (article.publishedAt.getTime() - currentArticle.publishedAt.getTime()) / (1000 * 60 * 60 * 24)
+    // Tag similarity score (primary factor)
+    const sharedTags = article.tags.filter(tag => 
+      currentArticle.tags.some(currentTag => 
+        currentTag.toLowerCase() === tag.toLowerCase()
+      )
     );
-    if (daysDiff <= 30) {
-      score += Math.max(0, 2 - (daysDiff / 15)); // Bonus decreases over 30 days
-    }
     
-    // Featured article bonus
-    if (article.featured) {
-      score += 1;
+    // Only score articles that have shared tags
+    if (sharedTags.length > 0) {
+      score += sharedTags.length * 10; // Weight shared tags heavily
+      
+      // Author similarity bonus
+      if (article.author.toLowerCase() === currentArticle.author.toLowerCase()) {
+        score += 5;
+      }
+      
+      // Category similarity bonus
+      if (article.category && currentArticle.category && 
+          article.category.toLowerCase() === currentArticle.category.toLowerCase()) {
+        score += 3;
+      }
+      
+      // Recency bonus (newer articles get slight preference)
+      const daysDiff = Math.abs(
+        (article.publishedAt.getTime() - currentArticle.publishedAt.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (daysDiff <= 30) {
+        score += Math.max(0, 2 - (daysDiff / 15)); // Bonus decreases over 30 days
+      }
+      
+      // Featured article bonus
+      if (article.featured) {
+        score += 1;
+      }
     }
     
     return {
@@ -237,13 +395,35 @@ export function getRelatedArticles(
     .filter(item => item.score > 0)
     .map(item => item.article);
   
-  // If we don't have enough related articles, fill with recent articles
+  // If we don't have enough related articles, fill with fallback articles
   if (relatedWithScore.length < limit) {
-    const recentArticles = sortArticles(otherArticles, 'newest')
-      .filter(article => !relatedWithScore.some(related => related.slug === article.slug))
-      .slice(0, limit - relatedWithScore.length);
+    const remainingArticles = otherArticles.filter(article => 
+      !relatedWithScore.some(related => related.slug === article.slug)
+    );
     
-    relatedWithScore.push(...recentArticles);
+    // Prioritize featured articles, then recent articles
+    const featuredArticles = remainingArticles.filter(article => article.featured);
+    const recentArticles = sortArticles(remainingArticles, 'newest');
+    
+    const fallbackArticles: Article[] = [];
+    
+    // Add featured articles first
+    featuredArticles.forEach(article => {
+      if (fallbackArticles.length < limit - relatedWithScore.length && 
+          !fallbackArticles.some(existing => existing.slug === article.slug)) {
+        fallbackArticles.push(article);
+      }
+    });
+    
+    // Fill remaining slots with recent articles
+    recentArticles.forEach(article => {
+      if (fallbackArticles.length < limit - relatedWithScore.length && 
+          !fallbackArticles.some(existing => existing.slug === article.slug)) {
+        fallbackArticles.push(article);
+      }
+    });
+    
+    relatedWithScore.push(...fallbackArticles);
   }
 
   return relatedWithScore.slice(0, limit);

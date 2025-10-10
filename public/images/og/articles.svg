@@ -40,8 +40,8 @@
   <!-- Author avatar -->
   
   <circle cx="76" cy="580" r="16" fill="#475569"/>
-  <text x="76" y="586" text-anchor="middle" fill="#f8fafc" font-size="16">T</text>
-  <text x="104" y="586" fill="#e2e8f0" font-size="18" font-weight="500">The Pulse Crew</text>
+  <text x="76" y="586" text-anchor="middle" fill="#f8fafc" font-size="16">C</text>
+  <text x="104" y="586" fill="#e2e8f0" font-size="18" font-weight="500">CryptoPulse Team</text>
   
   
   <!-- Site URL -->

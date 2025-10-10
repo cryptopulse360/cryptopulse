@@ -214,12 +214,15 @@ export function sanitizeInput(input: string, maxLength: number = 1000): string {
     return '';
   }
   
-  return input
-    .trim()
+  // First trim the input, then apply sanitization
+  const trimmedInput = input.trim();
+  
+  return trimmedInput
     .slice(0, maxLength)
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
     .replace(/javascript:/gi, '') // Remove javascript: protocols
-    .replace(/on\w+\s*=/gi, ''); // Remove event handlers
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers with values
+    .replace(/on\w+\s*=\s*[^\s>]*/gi, ''); // Remove event handlers without quotes
 }
 
 /**

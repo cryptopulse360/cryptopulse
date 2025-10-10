@@ -11,6 +11,7 @@ describe('/api/log-error', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it('successfully logs error data', async () => {
@@ -39,6 +40,8 @@ describe('/api/log-error', () => {
   });
 
   it('sanitizes malicious input', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+
     const maliciousData = {
       message: '<script>alert("xss")</script>Malicious message',
       stack: 'javascript:alert("hack")',
@@ -63,6 +66,11 @@ describe('/api/log-error', () => {
         message: 'Malicious message', // Script tags removed
         stack: 'alert("hack")', // javascript: removed
         userAgent: ' Mozilla/5.0', // onclick removed
+        type: 'unknown',
+        componentStack: '',
+        digest: '',
+        url: '',
+        timestamp: expect.any(String),
       })
     );
   });
@@ -105,6 +113,8 @@ describe('/api/log-error', () => {
   });
 
   it('limits field lengths', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+
     const longData = {
       message: 'a'.repeat(1000), // Should be truncated to 500
       stack: 'b'.repeat(3000), // Should be truncated to 2000
@@ -132,17 +142,19 @@ describe('/api/log-error', () => {
     );
   });
 
-  it('logs in development mode', () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+  it('logs in development mode', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
 
     const errorData = { message: 'Test error' };
     const request = new NextRequest('http://localhost/api/log-error', {
       method: 'POST',
       body: JSON.stringify(errorData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    POST(request);
+    await POST(request);
 
     expect(console.error).toHaveBeenCalledWith(
       'Client Error Logged:',
@@ -150,24 +162,22 @@ describe('/api/log-error', () => {
         message: 'Test error',
       })
     );
-
-    process.env.NODE_ENV = originalEnv;
   });
 
-  it('does not log in production mode', () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+  it('does not log in production mode', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
 
     const errorData = { message: 'Test error' };
     const request = new NextRequest('http://localhost/api/log-error', {
       method: 'POST',
       body: JSON.stringify(errorData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    POST(request);
+    await POST(request);
 
     expect(console.error).not.toHaveBeenCalled();
-
-    process.env.NODE_ENV = originalEnv;
   });
 });

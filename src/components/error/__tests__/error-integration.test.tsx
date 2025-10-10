@@ -1,11 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { SafeComponent } from '../SafeComponent';
 import { SafeImage } from '../SafeImage';
+import { NestedErrorBoundary } from '../NestedErrorBoundary';
 
 // Mock Next.js Image component
-jest.mock('next/image', () => {
-  return function MockImage({ src, alt, onError, ...props }: any) {
+vi.mock('next/image', () => ({
+  default: function MockImage({ src, alt, onError, ...props }: any) {
     return (
       <img
         src={src}
@@ -14,20 +16,20 @@ jest.mock('next/image', () => {
         {...props}
       />
     );
-  };
-});
+  },
+}));
 
 // Mock fetch for error logging
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('Error Handling Integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.clearAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Nested Error Boundaries', () => {
@@ -42,7 +44,7 @@ describe('Error Handling Integration', () => {
       );
     }
 
-    function InnerComponent() {
+    function InnerComponent(): React.ReactElement {
       throw new Error('Inner component error');
     }
 
@@ -53,6 +55,22 @@ describe('Error Handling Integration', () => {
       expect(screen.getByText('Outer Component')).toBeInTheDocument();
       
       // Inner component error should be caught by SafeComponent
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    });
+
+    it('handles nested error boundaries with NestedErrorBoundary component', () => {
+      function NestedErrorComponent() {
+        return (
+          <NestedErrorBoundary>
+            <div>Outer Content</div>
+            <InnerComponent />
+          </NestedErrorBoundary>
+        );
+      }
+
+      render(<NestedErrorComponent />);
+      
+      // Should handle the error gracefully
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     });
   });
@@ -179,14 +197,18 @@ describe('Error Handling Integration', () => {
   describe('Error Logging Integration', () => {
     it('logs errors in production environment', () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true
+      });
 
       Object.defineProperty(window, 'location', {
         value: { href: 'https://example.com/test' },
         writable: true,
       });
 
-      function ErrorComponent() {
+      function ErrorComponent(): React.ReactElement {
         throw new Error('Production error');
       }
 
@@ -204,12 +226,16 @@ describe('Error Handling Integration', () => {
         body: expect.stringContaining('Production error'),
       });
 
-      process.env.NODE_ENV = originalEnv;
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      });
     });
   });
 
   describe('Accessibility in Error States', () => {
-    function AccessibleErrorComponent() {
+    function AccessibleErrorComponent(): React.ReactElement {
       throw new Error('Accessibility test error');
     }
 

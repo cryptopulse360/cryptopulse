@@ -7,6 +7,9 @@ vi.mock('../og-image', () => ({
   generateArticleOGImage: vi.fn((article: Article) => 
     `http://localhost:3000/api/og?title=${encodeURIComponent(article.title)}`
   ),
+  generatePageOGImage: vi.fn((title: string, description?: string) => 
+    `http://localhost:3000/api/og?title=${encodeURIComponent(title)}${description ? `&description=${encodeURIComponent(description)}` : ''}`
+  ),
   getFallbackOGImage: vi.fn(() => 
     'http://localhost:3000/api/og?title=CryptoPulse'
   ),

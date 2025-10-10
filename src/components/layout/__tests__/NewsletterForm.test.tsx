@@ -1,23 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import { NewsletterForm } from '../NewsletterForm';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
 
 // Mock the newsletter service
 vi.mock('@/lib/newsletter', () => ({

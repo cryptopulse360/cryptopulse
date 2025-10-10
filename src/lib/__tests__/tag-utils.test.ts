@@ -1,30 +1,14 @@
-import { vi } from 'vitest';
-import { 
-  getAllTags, 
-  getArticlesByTag, 
-  getTagStats, 
-  getRelatedArticles 
-} from '../mdx';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { describe } from 'node:test';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { getRelatedArticles } from '../article-utils';
 
-// Mock fs module
-vi.mock('fs');
-vi.mock('path');
+// Mock the mdx module
+vi.mock('../mdx', () => ({
+  getAllTags: vi.fn(),
+  getArticlesByTag: vi.fn(),
+  getTagStats: vi.fn(),
+  getAllArticles: vi.fn(),
+  getArticleBySlug: vi.fn(),
+}));
 
 const mockArticles = [
   {
@@ -65,21 +49,51 @@ const mockArticles = [
   },
 ];
 
-// Mock getAllArticles to return our test data
-vi.mock('../mdx', async () => {
-  const actual = await vi.importActual('../mdx');
-  return {
-    ...actual,
-    getAllArticles: vi.fn(() => mockArticles),
-    getArticleBySlug: vi.fn((slug: string) => 
-      mockArticles.find(article => article.slug === slug) || null
-    ),
-  };
-});
-
 describe('Tag Utilities', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    
+    const { getAllTags, getArticlesByTag, getTagStats, getAllArticles, getArticleBySlug } = await import('../mdx');
+    
+    // Mock getAllTags
+    vi.mocked(getAllTags).mockReturnValue([
+      'analysis', 'bitcoin', 'defi', 'ethereum', 'market', 'nft', 'trends'
+    ]);
+    
+    // Mock getArticlesByTag
+    vi.mocked(getArticlesByTag).mockImplementation((tag: string) => {
+      const normalizedTag = tag.toLowerCase();
+      if (normalizedTag === 'bitcoin') {
+        return [mockArticles[0]];
+      } else if (normalizedTag === 'analysis') {
+        return [mockArticles[0], mockArticles[1]];
+      }
+      return [];
+    });
+    
+    // Mock getTagStats
+    vi.mocked(getTagStats).mockReturnValue([
+      { tag: 'analysis', count: 2 },
+      { tag: 'market', count: 2 },
+      { tag: 'bitcoin', count: 1 },
+      { tag: 'defi', count: 1 },
+      { tag: 'ethereum', count: 1 },
+      { tag: 'nft', count: 1 },
+      { tag: 'trends', count: 1 },
+    ]);
+    
+    // Mock getAllArticles
+    vi.mocked(getAllArticles).mockReturnValue(mockArticles);
+    
+    // Mock getArticleBySlug
+    vi.mocked(getArticleBySlug).mockImplementation((slug: string) => 
+      mockArticles.find(article => article.slug === slug) || null
+    );
+  });
+
   describe('getAllTags', () => {
-    it('returns all unique tags sorted alphabetically', () => {
+    it('returns all unique tags sorted alphabetically', async () => {
+      const { getAllTags } = await import('../mdx');
       const tags = getAllTags();
       
       expect(tags).toEqual([
@@ -89,21 +103,24 @@ describe('Tag Utilities', () => {
   });
 
   describe('getArticlesByTag', () => {
-    it('returns articles with matching tag (case insensitive)', () => {
+    it('returns articles with matching tag (case insensitive)', async () => {
+      const { getArticlesByTag } = await import('../mdx');
       const articles = getArticlesByTag('bitcoin');
       
       expect(articles).toHaveLength(1);
       expect(articles[0].slug).toBe('bitcoin-analysis');
     });
 
-    it('returns articles with matching tag in different case', () => {
+    it('returns articles with matching tag in different case', async () => {
+      const { getArticlesByTag } = await import('../mdx');
       const articles = getArticlesByTag('BITCOIN');
       
       expect(articles).toHaveLength(1);
       expect(articles[0].slug).toBe('bitcoin-analysis');
     });
 
-    it('returns multiple articles for common tags', () => {
+    it('returns multiple articles for common tags', async () => {
+      const { getArticlesByTag } = await import('../mdx');
       const articles = getArticlesByTag('analysis');
       
       expect(articles).toHaveLength(2);
@@ -111,7 +128,8 @@ describe('Tag Utilities', () => {
       expect(articles.map(a => a.slug)).toContain('ethereum-defi');
     });
 
-    it('returns empty array for non-existent tag', () => {
+    it('returns empty array for non-existent tag', async () => {
+      const { getArticlesByTag } = await import('../mdx');
       const articles = getArticlesByTag('nonexistent');
       
       expect(articles).toHaveLength(0);
@@ -119,7 +137,8 @@ describe('Tag Utilities', () => {
   });
 
   describe('getTagStats', () => {
-    it('returns tag statistics sorted by count', () => {
+    it('returns tag statistics sorted by count', async () => {
+      const { getTagStats } = await import('../mdx');
       const stats = getTagStats();
       
       expect(stats).toEqual([

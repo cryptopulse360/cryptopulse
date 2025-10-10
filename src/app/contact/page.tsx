@@ -20,56 +20,59 @@ export default function ContactPage() {
           We welcome inquiries from readers. For questions, feedback, or partnerships, please contact us.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+        <div className="grid md:grid-cols-2 gap-8 mb-12" data-testid="contact-grid">
+          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg" data-testid="contact-info">
             <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
             <div className="space-y-4">
-              <div>
+              <div data-testid="general-inquiries">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">General Inquiries</h3>
                 <p className="text-gray-600 dark:text-gray-400">hello.cryptopulse@outlook.com</p>
               </div>
               
-              <div>
+              <div data-testid="support-contact">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">Support</h3>
-                <p className="text-gray-600 dark:text-gray-400">assistance.cryptopulse@outlook.com</p>
+                <p className="text-gray-600 dark:text-gray-400" data-testid="support-email">assistance.cryptopulse@outlook.com</p>
               </div>
               
-              <div>
+              <div data-testid="business-contact">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">Business</h3>
                 <p className="text-gray-600 dark:text-gray-400">business.cryptopulse@outlook.com</p>
               </div>
               
-              <div>
+              <div data-testid="legal-contact">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">Privacy & Legal</h3>
-                <p className="text-gray-600 dark:text-gray-400">legal.cryptopulse@outlook.com</p>
+                <p className="text-gray-600 dark:text-gray-400" data-testid="legal-email">legal.cryptopulse@outlook.com</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg" data-testid="social-media">
             <h2 className="text-2xl font-semibold mb-4">Follow Us</h2>
             <div className="space-y-4">
-              <div>
+              <div data-testid="twitter-section">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">X (Twitter)</h3>
                 <a 
                   href={siteConfig.social.x} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline"
+                  data-testid="twitter-link"
+                  aria-label="Follow us on X (Twitter) @the_cryptopulse"
                 >
                   @the_cryptopulse
                 </a>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Latest updates and news</p>
               </div>
               
-              
-              <div>
+              <div data-testid="pinterest-section">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">Pinterest</h3>
                 <a 
                   href={siteConfig.social.pinterest} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline"
+                  data-testid="pinterest-link"
+                  aria-label="Follow us on Pinterest @cryptopulse360"
                 >
                   @cryptopulse360
                 </a>
@@ -85,8 +88,8 @@ export default function ContactPage() {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium mb-2" data-testid="contribute-question">How can I contribute content to CryptoPulse?</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                We accept guest contributions on cryptocurrency topics. Email hello.cryptopulse@outlook.com with your ideas, samples, and background. We review submissions and aim to respond within 5-7 business days.
+              <p className="text-gray-600 dark:text-gray-400" data-testid="contribute-answer">
+                We accept guest contributions on cryptocurrency topics. Email hello.cryptopulse@outlook.com with your ideas, samples, and background. We review submissions and aim to respond within 5-7 business days for editorial submissions.
               </p>
             </div>
             
@@ -119,9 +122,9 @@ export default function ContactPage() {
             
             <div>
             <h3 className="text-lg font-medium mb-2" data-testid="unsubscribe-question">How do I unsubscribe from your newsletter?</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400" data-testid="unsubscribe-info">
                 You can unsubscribe from our newsletter at any time by clicking the unsubscribe link at the 
-                bottom of any email we send you. If you need assistance, contact assistance.cryptopulse@outlook.com.
+                bottom of any email we send you. If you need assistance with unsubscribing, contact our support team.
               </p>
             </div>
           </div>
@@ -155,16 +158,16 @@ export default function ContactPage() {
           </ul>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibent mb-4">Technical Support</h2>
-          <p className="mb-4">
+        <section className="mb-8" data-testid="technical-support">
+          <h2 className="text-2xl font-semibold mb-4">Technical Support</h2>
+          <p className="mb-4" data-testid="tech-support-intro">
             Experiencing technical issues with our website? Here's how to get help:
           </p>
-          <ul className="list-disc pl-6 mb-4">
+          <ul className="list-disc pl-6 mb-4" data-testid="tech-support-steps">
             <li>Check our <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</a> for information about cookies and tracking</li>
-            <li>Try clearing your browser cache and cookies</li>
+            <li data-testid="cache-clearing">Try clearing your browser cache and cookies</li>
             <li>Ensure JavaScript is enabled in your browser</li>
-            <li>For persistent issues, email hello@cryptopulse.com with your browser and device information</li>
+            <li>For persistent issues, email assistance.cryptopulse@outlook.com with your browser and device information</li>
           </ul>
         </section>
 

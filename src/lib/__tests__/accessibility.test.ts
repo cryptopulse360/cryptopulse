@@ -288,7 +288,7 @@ describe('Accessibility Utils', () => {
 
       it('should have different requirements for large text', () => {
         // Some combinations that fail for normal text pass for large text
-        const foreground = '#757575'; // This should fail normal AA (3:1) but pass large AA (3:1)
+        const foreground = '#808080'; // This should fail normal AA (4.5:1) but pass large AA (3:1)
         const background = '#ffffff';
         
         const ratio = getContrastRatio(foreground, background);

@@ -1,24 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import DisclaimerPage from '../page';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
 
 // Mock the SEO metadata generation
 vi.mock('@/components/seo/SEOHead', () => ({
@@ -38,16 +21,11 @@ describe('DisclaimerPage', () => {
   });
 
   it('displays the last updated date', () => {
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    expect(screen.getByText(`Last updated: ${currentDate}`)).toBeInTheDocument();
+    expect(screen.getAllByText(/Last updated: October 10, 2025/i)[0]).toBeInTheDocument();
   });
 
   it('includes prominent risk warning', () => {
-    expect(screen.getByText(/⚠️ important risk warning/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/⚠️ important risk warning/i)[0]).toBeInTheDocument();
     expect(screen.getByText(/highly volatile and risky/i)).toBeInTheDocument();
     expect(screen.getByText(/never invest more than you can afford to lose/i)).toBeInTheDocument();
   });

@@ -72,6 +72,11 @@ export function handleKeyboardNavigation(
  * Announce content to screen readers
  */
 export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+  // Only run in browser environment
+  if (typeof document === 'undefined') {
+    return;
+  }
+  
   const announcement = document.createElement('div');
   announcement.setAttribute('aria-live', priority);
   announcement.setAttribute('aria-atomic', 'true');
@@ -82,7 +87,9 @@ export function announceToScreenReader(message: string, priority: 'polite' | 'as
   
   // Remove after announcement
   setTimeout(() => {
-    document.body.removeChild(announcement);
+    if (document.body.contains(announcement)) {
+      document.body.removeChild(announcement);
+    }
   }, 1000);
 }
 
@@ -90,6 +97,11 @@ export function announceToScreenReader(message: string, priority: 'polite' | 'as
  * Trap focus within a container (for modals, menus, etc.)
  */
 export function trapFocus(container: HTMLElement): () => void {
+  // Only run in browser environment
+  if (typeof document === 'undefined') {
+    return () => {};
+  }
+  
   const focusableElements = container.querySelectorAll(
     'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select, [tabindex]:not([tabindex="-1"])'
   ) as NodeListOf<HTMLElement>;

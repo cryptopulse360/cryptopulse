@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import {
   debounce,
   throttle,
@@ -6,70 +6,22 @@ import {
   getConnectionSpeed,
   PerformanceMonitor,
 } from '../performance';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
-
-// Mock performance API
-const mockPerformance = {
-  mark: vi.fn(),
-  measure: vi.fn(),
-  getEntriesByName: vi.fn(),
-  getEntriesByType: vi.fn(),
-  now: vi.fn(() => 1000),
-};
-
-Object.defineProperty(global, 'performance', {
-  value: mockPerformance,
-  writable: true,
-});
-
-// Mock navigator
-Object.defineProperty(global, 'navigator', {
-  value: {
-    connection: {
-      effectiveType: '4g',
-    },
-  },
-  writable: true,
-});
-
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+import { 
+  setupPerformanceTestEnvironment, 
+  mockReducedMotion, 
+  mockSlowConnection,
+  mockPerformanceEntries 
+} from '../../test/performance-setup';
 
 describe('Performance utilities', () => {
+  let testEnv: ReturnType<typeof setupPerformanceTestEnvironment>;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    testEnv = setupPerformanceTestEnvironment();
+  });
+
+  afterEach(() => {
+    testEnv.cleanup();
   });
 
   describe('debounce', () => {
@@ -126,12 +78,31 @@ describe('Performance utilities', () => {
       window.matchMedia = originalMatchMedia;
     });
 
-    it('returns matchMedia result', () => {
-      window.matchMedia = vi.fn().mockReturnValue({ matches: true });
-      expect(prefersReducedMotion()).toBe(true);
+    it('returns false when matchMedia throws an error', () => {
+      window.matchMedia = vi.fn().mockImplementation(() => {
+        throw new Error('matchMedia error');
+      });
 
-      window.matchMedia = vi.fn().mockReturnValue({ matches: false });
       expect(prefersReducedMotion()).toBe(false);
+    });
+
+    it('returns true when reduced motion is preferred', () => {
+      mockReducedMotion(true);
+      expect(prefersReducedMotion()).toBe(true);
+    });
+
+    it('returns false when reduced motion is not preferred', () => {
+      mockReducedMotion(false);
+      expect(prefersReducedMotion()).toBe(false);
+    });
+
+    it('returns false in server environment', () => {
+      const originalWindow = global.window;
+      delete (global as any).window;
+
+      expect(prefersReducedMotion()).toBe(false);
+
+      global.window = originalWindow;
     });
   });
 
@@ -146,7 +117,7 @@ describe('Performance utilities', () => {
     });
 
     it('returns slow for 2g connection', () => {
-      (navigator as any).connection.effectiveType = '2g';
+      mockSlowConnection();
       expect(getConnectionSpeed()).toBe('slow');
     });
 
@@ -163,10 +134,12 @@ describe('Performance utilities', () => {
   describe('PerformanceMonitor', () => {
     it('creates performance marks', () => {
       PerformanceMonitor.mark('test-mark');
+      const mockPerformance = global.performance as any;
       expect(mockPerformance.mark).toHaveBeenCalledWith('test-mark');
     });
 
     it('measures performance between marks', () => {
+      const mockPerformance = global.performance as any;
       mockPerformance.getEntriesByName.mockReturnValue([{ duration: 500 }]);
       
       const duration = PerformanceMonitor.measure('test-measure', 'start', 'end');
@@ -176,6 +149,7 @@ describe('Performance utilities', () => {
     });
 
     it('handles measurement errors gracefully', () => {
+      const mockPerformance = global.performance as any;
       mockPerformance.measure.mockImplementation(() => {
         throw new Error('Measurement failed');
       });
@@ -186,6 +160,8 @@ describe('Performance utilities', () => {
 
     it('gets navigation metrics', () => {
       const mockNavigationEntry = {
+        entryType: 'navigation',
+        name: 'document',
         fetchStart: 100,
         responseStart: 200,
         requestStart: 150,
@@ -193,7 +169,7 @@ describe('Performance utilities', () => {
         loadEventEnd: 400,
       };
 
-      mockPerformance.getEntriesByType.mockReturnValue([mockNavigationEntry]);
+      mockPerformanceEntries([mockNavigationEntry]);
 
       const metrics = PerformanceMonitor.getMetrics();
 
@@ -219,5 +195,78 @@ describe('Performance utilities', () => {
 
       global.performance = originalPerformance;
     });
+
+    it('handles missing navigation entries gracefully', () => {
+      const mockPerformance = global.performance as any;
+      mockPerformance.getEntriesByType.mockReturnValue([]);
+
+      const metrics = PerformanceMonitor.getMetrics();
+      expect(metrics).toBeNull();
+    });
   });
 });
+  
+describe('Browser API fallbacks', () => {
+    it('handles missing window object gracefully', () => {
+      const originalWindow = global.window;
+      delete (global as any).window;
+
+      expect(prefersReducedMotion()).toBe(false);
+
+      global.window = originalWindow;
+    });
+
+    it('handles missing navigator object gracefully', () => {
+      const originalNavigator = global.navigator;
+      delete (global as any).navigator;
+
+      expect(getConnectionSpeed()).toBe('unknown');
+
+      global.navigator = originalNavigator;
+    });
+
+    it('handles missing performance object gracefully', () => {
+      const originalPerformance = global.performance;
+      delete (global as any).performance;
+
+      PerformanceMonitor.mark('test');
+      expect(PerformanceMonitor.measure('test', 'start')).toBeNull();
+      expect(PerformanceMonitor.getMetrics()).toBeNull();
+
+      global.performance = originalPerformance;
+    });
+  });
+
+  describe('Performance optimization utilities', () => {
+    it('creates image observer when IntersectionObserver is available', () => {
+      const callback = vi.fn();
+      const observer = require('../performance').createImageObserver(callback);
+      
+      expect(observer).toBeDefined();
+    });
+
+    it('returns null when IntersectionObserver is not available', () => {
+      const originalIntersectionObserver = global.IntersectionObserver;
+      delete (global as any).IntersectionObserver;
+
+      const callback = vi.fn();
+      const observer = require('../performance').createImageObserver(callback);
+      
+      expect(observer).toBeNull();
+
+      global.IntersectionObserver = originalIntersectionObserver;
+    });
+
+    it('handles server-side rendering gracefully', () => {
+      const originalWindow = global.window;
+      delete (global as any).window;
+
+      const { preloadResource, prefetchResource } = require('../performance');
+      
+      // These should not throw errors in SSR
+      expect(() => preloadResource('/test.css', 'style')).not.toThrow();
+      expect(() => prefetchResource('/test.js')).not.toThrow();
+
+      global.window = originalWindow;
+    });
+  });

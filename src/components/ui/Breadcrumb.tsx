@@ -39,3 +39,6 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
     </nav>
   );
 }
+
+// Default export for backward compatibility
+export default Breadcrumb;

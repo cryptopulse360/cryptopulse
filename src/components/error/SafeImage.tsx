@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { handleImageError } from '@/lib/error-handling';
+// Remove unused import - we handle errors internally
 
 interface SafeImageProps {
   src: string;
@@ -29,16 +29,19 @@ export function SafeImage({
 }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
+  const [fallbackFailed, setFallbackFailed] = useState(false);
 
   const handleError = () => {
     if (!hasError && fallbackSrc && imgSrc !== fallbackSrc) {
       setImgSrc(fallbackSrc);
       setHasError(true);
+    } else if (hasError && imgSrc === fallbackSrc) {
+      setFallbackFailed(true);
     }
   };
 
   // If both original and fallback failed, show placeholder
-  if (hasError && imgSrc === fallbackSrc) {
+  if (fallbackFailed || (hasError && imgSrc === fallbackSrc)) {
     return (
       <div 
         className={`bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${className}`}
@@ -75,3 +78,6 @@ export function SafeImage({
 
   return <Image {...imageProps} />;
 }
+
+// Default export for backward compatibility
+export default SafeImage;

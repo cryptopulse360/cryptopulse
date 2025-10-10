@@ -110,7 +110,9 @@ describe('/api/newsletter/subscribe', () => {
     (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: false,
       json: async () => ({
-        message:
+        message: 'Invalid API key',
+      }),
+    });
 
     const request = new NextRequest('http://localhost:3000/api/newsletter/subscribe', {
       method: 'POST',
@@ -131,7 +133,7 @@ describe('/api/newsletter/subscribe', () => {
     (process.env as any).MAILERLITE_API_KEY = 'test-api-key';
 
     // Mock MailerLite duplicate email response
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: false,
       json: async () => ({
         message: 'Email already exists',
@@ -157,7 +159,7 @@ describe('/api/newsletter/subscribe', () => {
     (process.env as any).MAILERLITE_API_KEY = 'test-api-key';
 
     // Mock network error
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    (global.fetch as vi.Mock).mockRejectedValueOnce(new Error('Network error'));
 
     const request = new NextRequest('http://localhost:3000/api/newsletter/subscribe', {
       method: 'POST',
@@ -175,10 +177,10 @@ describe('/api/newsletter/subscribe', () => {
   });
 
   it('should include group ID when provided', async () => {
-    process.env.MAILERLITE_API_KEY = 'test-api-key';
-    process.env.MAILERLITE_GROUP_ID = 'test-group-id';
+    (process.env as any).MAILERLITE_API_KEY = 'test-api-key';
+    (process.env as any).MAILERLITE_GROUP_ID = 'test-group-id';
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: { id: '123' } }),
     });
@@ -192,17 +194,17 @@ describe('/api/newsletter/subscribe', () => {
 
     await POST(request);
 
-    const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+    const fetchCall = (global.fetch as vi.Mock).mock.calls[0];
     const requestBody = JSON.parse(fetchCall[1].body);
     
     expect(requestBody.groups).toEqual(['test-group-id']);
   });
 
   it('should handle empty group ID', async () => {
-    process.env.MAILERLITE_API_KEY = 'test-api-key';
+    (process.env as any).MAILERLITE_API_KEY = 'test-api-key';
     // No group ID set
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ data: { id: '123' } }),
     });
@@ -216,7 +218,7 @@ describe('/api/newsletter/subscribe', () => {
 
     await POST(request);
 
-    const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+    const fetchCall = (global.fetch as vi.Mock).mock.calls[0];
     const requestBody = JSON.parse(fetchCall[1].body);
     
     expect(requestBody.groups).toEqual([]);

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Article } from '@/types';
 import { siteConfig } from '@/lib/constants';
-import { generateOGImageUrl } from '@/lib/og-image';
+import { generateArticleOGImage, generatePageOGImage, getFallbackOGImage } from '@/lib/og-image';
 
 export interface SEOProps {
   title?: string;
@@ -33,11 +33,13 @@ export function generateSEOMetadata({
   // Use dynamic OG image generation for articles, fallback to provided image or default
   let seoImage: string;
   if (article) {
-    seoImage = generateOGImageUrl(article);
+    seoImage = generateArticleOGImage(article);
   } else if (image) {
     seoImage = image;
+  } else if (title) {
+    seoImage = generatePageOGImage(title, description);
   } else {
-    seoImage = siteConfig.seo.defaultImage;
+    seoImage = getFallbackOGImage();
   }
   
   const seoUrl = url || siteConfig.url;
@@ -89,7 +91,7 @@ export function generateSEOMetadata({
  */
 export function generateArticleStructuredData(article: Article, url: string): object {
   // Use the same OG image generation for structured data
-  const imageUrl = generateOGImageUrl(article);
+  const imageUrl = generateArticleOGImage(article);
   
   return {
     '@context': 'https://schema.org',

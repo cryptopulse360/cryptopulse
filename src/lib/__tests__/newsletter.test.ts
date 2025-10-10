@@ -132,6 +132,10 @@ describe('Newsletter Utils', () => {
     it('successfully subscribes with valid data', async () => {
       (fetch as any).mockResolvedValueOnce({
         ok: true,
+        json: () => Promise.resolve({
+          success: true,
+          message: 'Thank you for subscribing! Please check your email to confirm your subscription.',
+        }),
       });
 
       const result = await subscribeToNewsletter({
@@ -141,7 +145,7 @@ describe('Newsletter Utils', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('Thank you for subscribing');
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.requiresConfirmation).toBe(false);
     });
 
     it('handles validation errors', async () => {
@@ -166,32 +170,35 @@ describe('Newsletter Utils', () => {
       expect(result.message).toContain('try again later');
     });
 
-    it('sends correct form data to Mailchimp', async () => {
+    it('sends correct form data to API route', async () => {
       (fetch as any).mockResolvedValueOnce({
         ok: true,
+        json: () => Promise.resolve({
+          success: true,
+          message: 'Subscribed successfully',
+        }),
       });
 
       await subscribeToNewsletter({
         email: 'test@example.com',
         firstName: 'John',
         lastName: 'Doe',
-        tags: ['website', 'crypto'],
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        'https://example.us1.list-manage.com/subscribe/post?u=123&id=456',
+        '/api/newsletter/subscribe',
         expect.objectContaining({
           method: 'POST',
-          mode: 'no-cors',
-          body: expect.any(FormData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: 'test@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+          }),
         })
       );
-
-      const formData = (fetch as any).mock.calls[0][1].body as FormData;
-      expect(formData.get('EMAIL')).toBe('test@example.com');
-      expect(formData.get('FNAME')).toBe('John');
-      expect(formData.get('LNAME')).toBe('Doe');
-      expect(formData.get('TAGS')).toBe('website,crypto');
     });
   });
 
@@ -205,6 +212,7 @@ describe('Newsletter Utils', () => {
       expect(mockPlausible).toHaveBeenCalledWith('Newsletter Subscription', {
         props: {
           email_domain: 'example.com',
+          provider: 'mailerlite',
         },
       });
     });
@@ -218,6 +226,9 @@ describe('Newsletter Utils', () => {
       expect(mockGtag).toHaveBeenCalledWith('event', 'newsletter_subscription', {
         event_category: 'engagement',
         event_label: 'newsletter',
+        custom_parameters: {
+          provider: 'mailerlite',
+        },
       });
     });
 
@@ -230,6 +241,7 @@ describe('Newsletter Utils', () => {
       expect(mockPlausible).toHaveBeenCalledWith('Newsletter Subscription', {
         props: {
           email_domain: 'unknown',
+          provider: 'mailerlite',
         },
       });
     });

@@ -96,7 +96,6 @@ export function ArticleCard({
                   key={tag}
                   tag={tag}
                   size={variant === 'featured' ? 'md' : 'sm'}
-                  clickable={false}
                 />
               ))}
               {tags.length > (variant === 'compact' ? 2 : 3) && (
@@ -180,3 +179,6 @@ export function ArticleCard({
     </article>
   );
 }
+
+// Default export for backward compatibility
+export default ArticleCard;

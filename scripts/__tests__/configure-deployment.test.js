@@ -1,20 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const {
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
+import fs from 'fs';
+import {
   validateCNAME,
   validateNoJekyll,
   validateNextConfig,
   validatePackageJson,
   generateDeploymentSummary
-} = require('../configure-deployment');
+} from '../configure-deployment.js';
 
 // Mock console methods
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 
 beforeEach(() => {
-  console.log = jest.fn();
-  console.error = jest.fn();
+  console.log = vi.fn();
+  console.error = vi.fn();
 });
 
 afterEach(() => {
@@ -25,7 +25,7 @@ afterEach(() => {
 describe('Deployment Configuration', () => {
   describe('validateCNAME', () => {
     it('should detect when CNAME file does not exist', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       
       const result = validateCNAME();
       
@@ -34,8 +34,8 @@ describe('Deployment Configuration', () => {
     });
 
     it('should detect custom domain configuration', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('example.com\n');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('example.com\n');
       
       const result = validateCNAME();
       
@@ -44,8 +44,8 @@ describe('Deployment Configuration', () => {
     });
 
     it('should detect when only comments exist in CNAME', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('# Comment only\n# Another comment\n');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('# Comment only\n# Another comment\n');
       
       const result = validateCNAME();
       
@@ -56,7 +56,7 @@ describe('Deployment Configuration', () => {
 
   describe('validateNoJekyll', () => {
     it('should detect when .nojekyll file exists', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
       
       const result = validateNoJekyll();
       
@@ -65,7 +65,7 @@ describe('Deployment Configuration', () => {
     });
 
     it('should detect when .nojekyll file is missing', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       
       const result = validateNoJekyll();
       
@@ -76,8 +76,8 @@ describe('Deployment Configuration', () => {
 
   describe('validateNextConfig', () => {
     it('should validate correct Next.js configuration', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(`
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(`
         const nextConfig = {
           output: 'export',
           trailingSlash: true,
@@ -91,8 +91,8 @@ describe('Deployment Configuration', () => {
     });
 
     it('should detect missing static export configuration', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(`
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(`
         const nextConfig = {
           // Missing output: 'export'
         };
@@ -107,8 +107,8 @@ describe('Deployment Configuration', () => {
 
   describe('validatePackageJson', () => {
     it('should validate correct package.json scripts', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
         scripts: {
           build: 'next build',
           export: 'npm run build'
@@ -122,8 +122,8 @@ describe('Deployment Configuration', () => {
     });
 
     it('should detect missing build script', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
         scripts: {
           // Missing build script
         }
@@ -139,8 +139,8 @@ describe('Deployment Configuration', () => {
   describe('generateDeploymentSummary', () => {
     it('should return true when all validations pass', () => {
       // Mock all validation functions to return true
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync')
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync')
         .mockReturnValueOnce('example.com') // CNAME
         .mockReturnValueOnce(`output: 'export', trailingSlash: true`) // next.config.js
         .mockReturnValueOnce(JSON.stringify({ scripts: { build: 'next build' } })); // package.json
@@ -153,7 +153,7 @@ describe('Deployment Configuration', () => {
 
     it('should return false when validations fail', () => {
       // Mock validations to fail
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       
       const result = generateDeploymentSummary();
       
@@ -165,5 +165,5 @@ describe('Deployment Configuration', () => {
 
 // Restore fs mocks
 afterAll(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });

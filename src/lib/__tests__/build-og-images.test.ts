@@ -36,6 +36,13 @@ vi.mock('../constants', () => ({
 
 // Mock fs operations
 vi.mock('fs/promises', () => ({
+  default: {
+    mkdir: vi.fn(),
+    writeFile: vi.fn(),
+    readdir: vi.fn(() => Promise.resolve(['old-image.png'])),
+    unlink: vi.fn(),
+    access: vi.fn(),
+  },
   mkdir: vi.fn(),
   writeFile: vi.fn(),
   readdir: vi.fn(() => Promise.resolve(['old-image.png'])),
@@ -53,26 +60,29 @@ describe('Build OG Images', () => {
       await buildOGImages();
 
       // Should create output directory
-      expect(fs.mkdir).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.mkdir)).toHaveBeenCalledWith(
         expect.stringContaining(path.join('public', 'images', 'og')),
         { recursive: true }
       );
 
       // Should write image files for articles and pages
-      expect(fs.writeFile).toHaveBeenCalledTimes(5); // 2 articles + 3 pages
+      expect(vi.mocked(fs.writeFile)).toHaveBeenCalledTimes(5); // 2 articles + 3 pages
       
       // Check specific files
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.writeFile)).toHaveBeenCalledWith(
         expect.stringContaining('test-article-1.svg'),
-        expect.any(String)
+        expect.any(String),
+        'utf-8'
       );
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.writeFile)).toHaveBeenCalledWith(
         expect.stringContaining('test-article-2.svg'),
-        expect.any(String)
+        expect.any(String),
+        'utf-8'
       );
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.writeFile)).toHaveBeenCalledWith(
         expect.stringContaining('home.svg'),
-        expect.any(String)
+        expect.any(String),
+        'utf-8'
       );
     });
 
@@ -88,10 +98,10 @@ describe('Build OG Images', () => {
     it('should remove existing SVG and PNG files from OG directory', async () => {
       await cleanOGImages();
 
-      expect(fs.readdir).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.readdir)).toHaveBeenCalledWith(
         expect.stringContaining(path.join('public', 'images', 'og'))
       );
-      expect(fs.unlink).toHaveBeenCalledWith(
+      expect(vi.mocked(fs.unlink)).toHaveBeenCalledWith(
         expect.stringContaining('old-image.png')
       );
     });

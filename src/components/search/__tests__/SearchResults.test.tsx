@@ -7,7 +7,7 @@ import { beforeEach } from 'node:test';
 
 // Mock TagBadge component
 vi.mock('@/components/article/TagBadge', () => ({
-  default: ({ tag }: { tag: string }) => <span data-testid="tag-badge">{tag}</span>,
+  TagBadge: ({ tag }: { tag: string }) => <span data-testid="tag-badge">{tag}</span>,
 }));
 
 // Mock Next.js Link
@@ -93,14 +93,24 @@ describe('SearchResults', () => {
   it('should render article titles', () => {
     render(<SearchResults {...defaultProps} />);
     
-    expect(screen.getByText('Bitcoin Price Analysis')).toBeInTheDocument();
+    // Use getByText with a function matcher to handle highlighted text
+    expect(screen.getByText((content, element) => {
+      return element?.tagName.toLowerCase() === 'h3' && 
+             element?.textContent === 'Bitcoin Price Analysis';
+    })).toBeInTheDocument();
+    
     expect(screen.getByText('Ethereum DeFi Revolution')).toBeInTheDocument();
   });
 
   it('should render article descriptions', () => {
     render(<SearchResults {...defaultProps} />);
     
-    expect(screen.getByText('Comprehensive analysis of Bitcoin price trends')).toBeInTheDocument();
+    // Use getByText with a function matcher to handle highlighted text
+    expect(screen.getByText((content, element) => {
+      return element?.tagName.toLowerCase() === 'p' && 
+             element?.textContent === 'Comprehensive analysis of Bitcoin price trends';
+    })).toBeInTheDocument();
+    
     expect(screen.getByText('How Ethereum is transforming decentralized finance')).toBeInTheDocument();
   });
 
@@ -144,8 +154,9 @@ describe('SearchResults', () => {
     const onResultClick = vi.fn();
     render(<SearchResults {...defaultProps} onResultClick={onResultClick} />);
     
-    const firstResult = screen.getByText('Bitcoin Price Analysis').closest('a');
-    fireEvent.click(firstResult!);
+    // Find the first result link by its href attribute
+    const firstResult = screen.getByRole('link', { name: /bitcoin price analysis/i });
+    fireEvent.click(firstResult);
     
     expect(onResultClick).toHaveBeenCalledWith(mockResults[0]);
   });
@@ -153,7 +164,7 @@ describe('SearchResults', () => {
   it('should highlight selected result', () => {
     render(<SearchResults {...defaultProps} selectedIndex={0} />);
     
-    const firstResult = screen.getByText('Bitcoin Price Analysis').closest('a');
+    const firstResult = screen.getByRole('link', { name: /bitcoin price analysis/i });
     expect(firstResult).toHaveClass('border-blue-500', 'bg-blue-50');
   });
 
@@ -177,8 +188,8 @@ describe('SearchResults', () => {
   it('should have proper link hrefs', () => {
     render(<SearchResults {...defaultProps} />);
     
-    const firstLink = screen.getByText('Bitcoin Price Analysis').closest('a');
-    const secondLink = screen.getByText('Ethereum DeFi Revolution').closest('a');
+    const firstLink = screen.getByRole('link', { name: /bitcoin price analysis/i });
+    const secondLink = screen.getByRole('link', { name: /ethereum defi revolution/i });
     
     expect(firstLink).toHaveAttribute('href', '/articles/bitcoin-analysis');
     expect(secondLink).toHaveAttribute('href', '/articles/ethereum-defi');

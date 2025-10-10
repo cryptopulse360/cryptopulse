@@ -37,24 +37,24 @@ export function ThemeProvider({
 
   useEffect(() => {
     setMounted(true);
-    
+
     try {
       // Get theme from localStorage or use default
       const savedTheme = localStorage.getItem(storageKey) as Theme | null;
       if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
         setThemeState(savedTheme);
       }
-      
+
       // Set initial theme to prevent FOUC
       const initialTheme = savedTheme || defaultTheme;
       let resolved: 'light' | 'dark';
-      
+
       if (initialTheme === 'system') {
         resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       } else {
         resolved = initialTheme;
       }
-      
+
       setResolvedTheme(resolved);
       document.documentElement.classList.remove('light', 'dark');
       document.documentElement.classList.add(resolved);
@@ -74,7 +74,7 @@ export function ThemeProvider({
 
     const updateTheme = () => {
       let resolved: 'light' | 'dark';
-      
+
       if (theme === 'system') {
         resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       } else {
@@ -82,12 +82,12 @@ export function ThemeProvider({
       }
 
       setResolvedTheme(resolved);
-      
+
       // Update document class
       const root = document.documentElement;
       root.classList.remove('light', 'dark');
       root.classList.add(resolved);
-      
+
       // Update data attribute for CSS
       root.setAttribute('data-theme', resolved);
     };
@@ -98,7 +98,7 @@ export function ThemeProvider({
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => updateTheme();
-      
+
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }

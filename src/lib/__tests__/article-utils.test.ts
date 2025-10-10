@@ -248,7 +248,7 @@ describe('Article Utils', () => {
     ];
 
     it('returns related articles based on shared tags', () => {
-      const related = getRelatedArticles(currentArticle, articles);
+      const related = getRelatedArticles(currentArticle, articles, 2);
       
       expect(related).toHaveLength(2);
       expect(related.some(a => a.slug === 'related-1')).toBe(true);

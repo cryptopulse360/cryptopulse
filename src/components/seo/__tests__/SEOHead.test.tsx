@@ -29,7 +29,7 @@ describe('SEOHead', () => {
       const metadata = generateSEOMetadata({});
       
       expect(metadata.title).toBe('CryptoPulse');
-      expect(metadata.description).toContain('cryptocurrency news');
+      expect(metadata.description).toContain('Crypto News');
       expect(metadata.openGraph?.type).toBe('website');
       expect(metadata.twitter?.card).toBe('summary_large_image');
     });
@@ -171,7 +171,7 @@ describe('SEOHead', () => {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'CryptoPulse',
-        description: expect.stringContaining('cryptocurrency news'),
+        description: 'Your Premier Source for Crypto News and Analysis',
         url: 'https://cryptopulse.github.io',
         potentialAction: {
           '@type': 'SearchAction',
@@ -189,9 +189,9 @@ describe('SEOHead', () => {
             url: 'https://cryptopulse.github.io/images/logo.png',
           },
           sameAs: [
-            'https://twitter.com/cryptopulse',
-            'https://github.com/cryptopulse',
-            'https://linkedin.com/company/cryptopulse',
+            'https://twitter.com/cryptopulse360',
+            'https://github.com/cryptopulse360/cryptopulse',
+            'https://www.linkedin.com/company/cryptopulse360',
           ],
         },
       });

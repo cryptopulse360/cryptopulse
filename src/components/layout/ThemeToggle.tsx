@@ -145,3 +145,6 @@ export function ThemeToggle() {
     </button>
   );
 }
+
+// Default export for backward compatibility
+export default ThemeToggle;

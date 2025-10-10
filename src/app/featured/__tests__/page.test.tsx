@@ -1,42 +1,43 @@
 import { render, screen } from '@testing-library/react';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import FeaturedPage from '../page';
 import { getAllArticles } from '@/lib/mdx';
 
 // Mock the MDX library
-jest.mock('@/lib/mdx', () => ({
-  getAllArticles: jest.fn(),
+vi.mock('@/lib/mdx', () => ({
+  getAllArticles: vi.fn(),
 }));
 
 // Mock the components
-jest.mock('@/components/article/ArticleCard', () => {
-  return function MockArticleCard({ article, variant }: any) {
+vi.mock('@/components/article/ArticleCard', () => ({
+  default: function MockArticleCard({ article, variant }: any) {
     return (
       <div data-testid="article-card" data-variant={variant}>
         {article.title}
         {article.featured && <span data-testid="featured-badge">Featured</span>}
       </div>
     );
-  };
-});
+  },
+}));
 
-jest.mock('@/components/ui/Breadcrumb', () => {
-  return function MockBreadcrumb({ items }: any) {
+vi.mock('@/components/ui/Breadcrumb', () => ({
+  default: function MockBreadcrumb({ items }: any) {
     return <nav data-testid="breadcrumb">{items.map((item: any) => item.label).join(' > ')}</nav>;
-  };
-});
+  },
+}));
 
-jest.mock('@/components/seo', () => ({
-  generateSEOMetadata: jest.fn(() => ({
+vi.mock('@/components/seo/SEOHead', () => ({
+  generateSEOMetadata: vi.fn(() => ({
     title: 'Featured Articles - CryptoPulse',
     description: 'Discover our hand-picked featured articles covering the most important topics in cryptocurrency and blockchain technology.',
   })),
 }));
 
-const mockGetAllArticles = getAllArticles as jest.MockedFunction<typeof getAllArticles>;
+const mockGetAllArticles = vi.mocked(getAllArticles);
 
 describe('Featured Page', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders featured articles page with featured articles', async () => {

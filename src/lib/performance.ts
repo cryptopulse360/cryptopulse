@@ -87,7 +87,15 @@ export function throttle<T extends (...args: any[]) => any>(
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
   
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Check if matchMedia is available
+  if (!window.matchMedia) return false;
+  
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch (error) {
+    // Fallback if matchMedia fails
+    return false;
+  }
 }
 
 /**
@@ -179,16 +187,24 @@ export class PerformanceMonitor {
   static getMetrics() {
     if (typeof performance === 'undefined') return null;
     
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    
-    return {
-      // Core Web Vitals approximations
-      fcp: navigation.responseStart - navigation.fetchStart,
-      lcp: navigation.loadEventEnd - navigation.fetchStart,
-      ttfb: navigation.responseStart - navigation.requestStart,
-      domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
-      loadComplete: navigation.loadEventEnd - navigation.fetchStart,
-    };
+    try {
+      const navigationEntries = performance.getEntriesByType('navigation');
+      if (!navigationEntries || navigationEntries.length === 0) return null;
+      
+      const navigation = navigationEntries[0] as PerformanceNavigationTiming;
+      
+      return {
+        // Core Web Vitals approximations
+        fcp: navigation.responseStart - navigation.fetchStart,
+        lcp: navigation.loadEventEnd - navigation.fetchStart,
+        ttfb: navigation.responseStart - navigation.requestStart,
+        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+        loadComplete: navigation.loadEventEnd - navigation.fetchStart,
+      };
+    } catch (error) {
+      console.warn('Failed to get performance metrics:', error);
+      return null;
+    }
   }
 }
 

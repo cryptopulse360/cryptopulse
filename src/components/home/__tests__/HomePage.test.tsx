@@ -44,25 +44,27 @@ describe('Home Page Components', () => {
     it('renders hero section with main heading', () => {
       render(<HeroSection />);
       
-      expect(screen.getByText(/Your Premier Source for/)).toBeInTheDocument();
-      expect(screen.getByText(/Crypto News/)).toBeInTheDocument();
-      expect(screen.getByText(/Stay ahead of the curve/)).toBeInTheDocument();
+      expect(screen.getByText(/Your Wire to the Future of Finance/)).toBeInTheDocument();
+      expect(screen.getByText(/Professional resources to understand and navigate digital assets/)).toBeInTheDocument();
+      expect(screen.getByText(/CryptoPulse:/)).toBeInTheDocument();
     });
 
     it('renders CTA buttons', () => {
       render(<HeroSection />);
       
       expect(screen.getByText('Explore Articles')).toBeInTheDocument();
-      expect(screen.getByText('Search Articles')).toBeInTheDocument();
+      expect(screen.getByText('Search Insights')).toBeInTheDocument();
     });
 
     it('renders stats section', () => {
       render(<HeroSection />);
       
-      expect(screen.getByText('500+')).toBeInTheDocument();
-      expect(screen.getByText('Articles Published')).toBeInTheDocument();
-      expect(screen.getByText('50K+')).toBeInTheDocument();
-      expect(screen.getByText('Monthly Readers')).toBeInTheDocument();
+      expect(screen.getByText('Timely')).toBeInTheDocument();
+      expect(screen.getByText('Updates')).toBeInTheDocument();
+      expect(screen.getByText('In-Depth')).toBeInTheDocument();
+      expect(screen.getByText('Analysis')).toBeInTheDocument();
+      expect(screen.getByText('Educational')).toBeInTheDocument();
+      expect(screen.getByText('Resources')).toBeInTheDocument();
     });
   });
 
@@ -72,7 +74,7 @@ describe('Home Page Components', () => {
       render(<FeaturedSection articles={articles} />);
       
       expect(screen.getByText('Featured Articles')).toBeInTheDocument();
-      expect(screen.getByText('Hand-picked stories from our editorial team')).toBeInTheDocument();
+      expect(screen.getByText('Selected analyses and insights')).toBeInTheDocument();
       expect(screen.getByTestId('article-card-test-article')).toBeInTheDocument();
     });
 
@@ -109,7 +111,7 @@ describe('Home Page Components', () => {
       render(<LatestSection articles={articles} />);
       
       expect(screen.getByText('Latest Articles')).toBeInTheDocument();
-      expect(screen.getByText('Stay up to date with the newest crypto insights and analysis')).toBeInTheDocument();
+      expect(screen.getByText('Stay positioned ahead of market-moving developments')).toBeInTheDocument();
       expect(screen.getByTestId('article-card-test-article')).toBeInTheDocument();
     });
 
@@ -122,8 +124,8 @@ describe('Home Page Components', () => {
       const articles = [mockArticle];
       render(<LatestSection articles={articles} />);
       
-      expect(screen.getByText('Never Miss a Story')).toBeInTheDocument();
-      expect(screen.getByText('Subscribe to Newsletter')).toBeInTheDocument();
+      expect(screen.getByText('VIP Newsletter')).toBeInTheDocument();
+      expect(screen.getByText('Join Elite Subscribers')).toBeInTheDocument();
     });
 
     it('limits articles to 6 items', () => {

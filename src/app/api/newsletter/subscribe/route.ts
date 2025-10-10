@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle group ID - include groups array in request
+    const groupId = process.env.MAILERLITE_GROUP_ID;
+    const groups = groupId ? [groupId] : [];
+
     // Prepare subscriber data for MailerLite
     const subscriberData = {
       email: email.trim(),
@@ -32,6 +36,7 @@ export async function POST(request: NextRequest) {
         name: firstName?.trim() || '',
         last_name: lastName?.trim() || '',
       },
+      groups: groups,
       status: 'active', // Use 'unconfirmed' for double opt-in
     };
 
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: false,
           message: 'This email is already subscribed to our newsletter.',
-        });
+        }, { status: 400 });
       }
       
       console.error('MailerLite API error:', result);

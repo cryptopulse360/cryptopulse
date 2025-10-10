@@ -1,15 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import { notFound } from 'next/navigation';
 import TagPage from '../page';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -62,7 +55,7 @@ describe('TagPage', () => {
     
     render(<TagPage params={params} />);
     
-    expect(screen.getByText('Bitcoin')).toBeInTheDocument();
+    expect(screen.getAllByText('Bitcoin')[0]).toBeInTheDocument();
     expect(screen.getByText('2 articles tagged with Bitcoin')).toBeInTheDocument();
     expect(screen.getByText('Bitcoin Article 1')).toBeInTheDocument();
     expect(screen.getByText('Bitcoin Article 2')).toBeInTheDocument();
@@ -75,7 +68,7 @@ describe('TagPage', () => {
     
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('Bitcoin')).toBeInTheDocument();
+    expect(screen.getAllByText('Bitcoin')[0]).toBeInTheDocument();
   });
 
   it('calls notFound when no articles exist for tag', () => {

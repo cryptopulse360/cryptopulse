@@ -1,21 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import ContactPage from '../page';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
 
 // Mock the SEO metadata generation
 vi.mock('@/components/seo/SEOHead', () => ({
@@ -33,6 +19,8 @@ vi.mock('@/lib/constants', () => ({
       twitter: 'https://twitter.com/cryptopulse',
       github: 'https://github.com/cryptopulse',
       linkedin: 'https://linkedin.com/company/cryptopulse',
+      x: 'https://x.com/the_cryptopulse',
+      pinterest: 'https://pin.it/1cITW7xl0',
     },
   },
 }));
@@ -47,27 +35,28 @@ describe('ContactPage', () => {
   });
 
   it('displays contact information', () => {
-    expect(screen.getByText(/get in touch/i)).toBeInTheDocument();
-    expect(screen.getByText(/hello@cryptopulse.com/i)).toBeInTheDocument();
-    expect(screen.getByText(/editorial@cryptopulse.com/i)).toBeInTheDocument();
-    expect(screen.getByText(/partnerships@cryptopulse.com/i)).toBeInTheDocument();
-    expect(screen.getByText(/legal@cryptopulse.com/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/get in touch/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/hello.cryptopulse@outlook.com/i)[0]).toBeInTheDocument();
+    expect(screen.getByTestId('support-email')).toHaveTextContent('assistance.cryptopulse@outlook.com');
+    expect(screen.getByTestId('business-contact')).toHaveTextContent('business.cryptopulse@outlook.com');
+    expect(screen.getByTestId('legal-email')).toHaveTextContent('legal.cryptopulse@outlook.com');
   });
 
   it('includes social media links', () => {
-    expect(screen.getByText(/follow us/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/follow us/i)[0]).toBeInTheDocument();
     
-    const twitterLink = screen.getByRole('link', { name: /@cryptopulse/i });
-    const githubLink = screen.getByRole('link', { name: /github.com\/cryptopulse/i });
-    const linkedinLink = screen.getByRole('link', { name: /cryptopulse company/i });
+    const twitterLink = screen.getByTestId('twitter-link');
+    const pinterestLink = screen.getByTestId('pinterest-link');
     
-    expect(twitterLink).toHaveAttribute('href', 'https://twitter.com/cryptopulse');
-    expect(githubLink).toHaveAttribute('href', 'https://github.com/cryptopulse');
-    expect(linkedinLink).toHaveAttribute('href', 'https://linkedin.com/company/cryptopulse');
-    
-    // Check external link attributes
+    expect(twitterLink).toHaveAttribute('href', 'https://x.com/the_cryptopulse');
     expect(twitterLink).toHaveAttribute('target', '_blank');
     expect(twitterLink).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(twitterLink).toHaveAttribute('aria-label', 'Follow us on X (Twitter) @the_cryptopulse');
+    
+    expect(pinterestLink).toHaveAttribute('href', 'https://pin.it/1cITW7xl0');
+    expect(pinterestLink).toHaveAttribute('target', '_blank');
+    expect(pinterestLink).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(pinterestLink).toHaveAttribute('aria-label', 'Follow us on Pinterest @cryptopulse360');
   });
 
   it('includes FAQ section', () => {
@@ -80,7 +69,7 @@ describe('ContactPage', () => {
   it('displays response times', () => {
     expect(screen.getByText(/response times/i)).toBeInTheDocument();
     expect(screen.getByText(/1-2 business days/i)).toBeInTheDocument();
-    expect(screen.getByText(/5-7 business days/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/5-7 business days/i)).toHaveLength(2); // One in FAQ, one in response times
   });
 
   it('includes content guidelines', () => {
@@ -91,7 +80,7 @@ describe('ContactPage', () => {
 
   it('provides technical support information', () => {
     expect(screen.getByText(/technical support/i)).toBeInTheDocument();
-    expect(screen.getByText(/clear your browser cache/i)).toBeInTheDocument();
+    expect(screen.getByTestId('cache-clearing')).toHaveTextContent(/clearing your browser cache/i);
   });
 
   it('has newsletter subscription link', () => {
@@ -115,10 +104,10 @@ describe('ContactPage', () => {
   });
 
   it('has proper grid layout for contact information', () => {
-    expect(screen.getByText(/general inquiries/i)).toBeInTheDocument();
-    expect(screen.getByText(/editorial team/i)).toBeInTheDocument();
-    expect(screen.getByText(/partnerships/i)).toBeInTheDocument();
-    expect(screen.getByText(/privacy & legal/i)).toBeInTheDocument();
+    expect(screen.getByTestId('general-inquiries')).toBeInTheDocument();
+    expect(screen.getByTestId('support-contact')).toBeInTheDocument();
+    expect(screen.getByTestId('business-contact')).toBeInTheDocument();
+    expect(screen.getByTestId('legal-contact')).toBeInTheDocument();
   });
 
   it('includes stay connected section', () => {

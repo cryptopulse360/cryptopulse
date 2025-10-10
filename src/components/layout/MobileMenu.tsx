@@ -73,3 +73,6 @@ export function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProps) {
     </>
   );
 }
+
+// Default export for backward compatibility
+export default MobileMenu;
