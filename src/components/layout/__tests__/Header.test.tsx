@@ -1,8 +1,18 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
-import { Header } from '../Header';
+import Header from '../Header';
 import { vi } from 'vitest';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { it } from 'node:test';
+import { afterEach } from 'node:test';
+import { beforeEach } from 'node:test';
+import { describe } from 'node:test';
 
 // Mock Next.js navigation
 vi.mock('next/navigation', () => ({
@@ -25,6 +35,13 @@ describe('Header', () => {
     
     expect(screen.getByLabelText('CryptoPulse Home')).toBeInTheDocument();
     expect(screen.getByText('CryptoPulse')).toBeInTheDocument();
+    
+    const logo = screen.getByAltText('CryptoPulse Logo');
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute('src', '/images/logo.PNG');
+    
+    // Verify tagline is not present
+    expect(screen.queryByText('Your trusted source for cryptocurrency news')).not.toBeInTheDocument();
   });
 
   it('renders all navigation items', () => {
@@ -33,6 +50,8 @@ describe('Header', () => {
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Articles')).toBeInTheDocument();
     expect(screen.getByText('Tags')).toBeInTheDocument();
+    expect(screen.getByText('Newsletter')).toBeInTheDocument();
+    expect(screen.getByText('Authors')).toBeInTheDocument();
     expect(screen.getByText('About')).toBeInTheDocument();
     expect(screen.getByText('Contact')).toBeInTheDocument();
   });

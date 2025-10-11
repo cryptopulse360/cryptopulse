@@ -33,6 +33,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run tests
+        run: npm test
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Build application
+        run: npm run build
+
       - name: Prepare deployment files
         run: |
           # Ensure .nojekyll exists for GitHub Pages

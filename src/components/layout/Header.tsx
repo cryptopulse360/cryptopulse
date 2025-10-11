@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { mainNavigation } from '@/lib/constants';
 import { ThemeToggle } from './ThemeToggle';
 import { SearchToggle } from './SearchToggle';
 import { MobileMenu } from './MobileMenu';
@@ -9,18 +11,13 @@ import { MobileMenu } from './MobileMenu';
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { trackSearchOpen } = useAnalytics();
 
-  const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Articles', href: '/articles' },
-    { name: 'Tags', href: '/tags' },
-    { name: 'Newsletter', href: '/newsletter' },
-  ];
+  // Filter navigation to only show the items we want in the header
+  const navigation = mainNavigation.filter(item => 
+    ['/', '/articles', '/tags', '/newsletter', '/authors', '/about', '/contact'].includes(item.href)
+  );
 
-  const handleSearchOpen = () => {
-    trackSearchOpen();
-  };
+
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -33,16 +30,17 @@ const Header: React.FC = () => {
               className="flex items-center space-x-2 focus-ring rounded-md"
               aria-label="CryptoPulse Home"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm" aria-hidden="true">CP</span>
-              </div>
+              <img 
+                src="/images/logo.PNG" 
+                alt="CryptoPulse Logo" 
+                className="w-8 h-8 rounded-lg"
+                width={32}
+                height={32}
+              />
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   CryptoPulse
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                  Your trusted source for cryptocurrency news
-                </p>
               </div>
             </Link>
           </div>
@@ -55,7 +53,7 @@ const Header: React.FC = () => {
           >
             {navigation.map((item) => (
               <Link
-                key={item.name}
+                key={item.label}
                 href={item.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus-ring ${
                   pathname === item.href
@@ -64,7 +62,7 @@ const Header: React.FC = () => {
                 }`}
                 aria-current={pathname === item.href ? 'page' : undefined}
               >
-                {item.name}
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -120,6 +118,7 @@ const Header: React.FC = () => {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         pathname={pathname}
+        navigation={navigation}
       />
     </header>
   );

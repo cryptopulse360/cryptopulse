@@ -1,13 +1,11 @@
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getAuthorBySlug, allAuthors } from '@/lib/authors';
 import { getArticlesByAuthor } from '@/lib/mdx';
 import { ArticleCard } from '@/components/article/ArticleCard';
 import { AuthorProfile } from '@/components/author/AuthorProfile';
-import { PersonStructuredData } from '@/components/author/PersonStructuredData';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { generateSEOMetadata } from '@/components/seo';
-import { siteConfig } from '@/lib/constants';
 import type { Author } from '@/types/author';
 
 type Props = {
@@ -19,8 +17,7 @@ async function getAuthor(props: Props): Promise<Author | null> {
 }
 
 export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
+  { params }: Props
 ): Promise<Metadata> {
   const author = await getAuthor({ params });
   if (!author) {

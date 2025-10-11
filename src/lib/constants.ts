@@ -10,9 +10,6 @@ export const siteConfig: SiteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cryptopulse.github.io',
   author: 'The Pulse Crew',
   social: {
-    twitter: 'https://twitter.com/cryptopulse360',
-    github: 'https://github.com/cryptopulse360/cryptopulse',
-    linkedin: 'https://www.linkedin.com/company/cryptopulse360',
     x: 'https://x.com/the_cryptopulse',
     pinterest: 'https://pin.it/1cITW7xl0',
   },
@@ -44,6 +41,10 @@ export const mainNavigation: NavItem[] = [
   {
     label: 'Tags',
     href: '/tags',
+  },
+  {
+    label: 'Newsletter',
+    href: '/newsletter',
   },
   {
     label: 'Authors',

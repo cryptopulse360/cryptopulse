@@ -21,16 +21,25 @@
   
   <!-- Tags -->
   
+      <rect x="1020" y="60" width="110" height="28" rx="6" fill="#1e40af"/>
+      <text x="1075" y="78" text-anchor="middle" fill="#dbeafe" font-size="14" font-weight="500">#defi</text>
+    
+      <rect x="900" y="60" width="110" height="28" rx="6" fill="#1e40af"/>
+      <text x="955" y="78" text-anchor="middle" fill="#dbeafe" font-size="14" font-weight="500">#yield-farming</text>
+    
+      <rect x="780" y="60" width="110" height="28" rx="6" fill="#1e40af"/>
+      <text x="835" y="78" text-anchor="middle" fill="#dbeafe" font-size="14" font-weight="500">#liquidity-mining</text>
+    
   
   <!-- Title -->
   <text x="60" y="250" fill="#f8fafc" font-size="56" font-weight="bold">
-    <tspan x="60" dy="0">Browse by Tags</tspan>
+    <tspan x="60" dy="0">DeFi Yield Farming: Strategies for 2024</tspan>
   </text>
   
   <!-- Description -->
   
   <text x="60" y="320" fill="#cbd5e1" font-size="24">
-    <tspan x="60" dy="0">Explore articles by cryptocurrency topics and tags</tspan>
+    <tspan x="60" dy="0">Review of yield farming strategies, risk management, and DeFi protocols in decentralized finance.</tspan>
   </text>
   
   
@@ -40,8 +49,8 @@
   <!-- Author avatar -->
   
   <circle cx="76" cy="580" r="16" fill="#475569"/>
-  <text x="76" y="586" text-anchor="middle" fill="#f8fafc" font-size="16">T</text>
-  <text x="104" y="586" fill="#e2e8f0" font-size="18" font-weight="500">The Pulse Crew</text>
+  <text x="76" y="586" text-anchor="middle" fill="#f8fafc" font-size="16">M</text>
+  <text x="104" y="586" fill="#e2e8f0" font-size="18" font-weight="500">Marcus DeFi</text>
   
   
   <!-- Site URL -->
