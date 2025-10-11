@@ -1,0 +1,198 @@
+name: Fast Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  fast-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run deployment with error handling
+        run: |
+          echo "🚀 Running deployment with comprehensive error handling..."
+          node scripts/deployment-error-handler.js complete fast
+        timeout-minutes: 8
+        env:
+          DEPLOYMENT_MODE: fast
+          SKIP_OG_GENERATION: true
+          MAX_RETRIES: 3
+
+      - name: Verify build output exists
+        run: |
+          echo "🔍 Verifying build output from error handler..."
+          if [ ! -d "./out" ]; then
+            echo "::error::Build output directory not found after error handling"
+            exit 1
+          fi
+          
+          if [ ! -f "./out/index.html" ]; then
+            echo "::error::index.html not found in build output"
+            exit 1
+          fi
+          
+          echo "✅ Build output verification passed"
+
+      - name: Verify build output
+        run: |
+          echo "🔍 Verifying build output..."
+          
+          # Check if build directory exists
+          if [ ! -d "./out" ]; then
+            echo "::error::Build output directory 'out' not found"
+            exit 1
+          fi
+          
+          # Check for essential files
+          if [ ! -f "./out/index.html" ]; then
+            echo "::error::index.html not found in build output"
+            exit 1
+          fi
+          
+          # Check build size (warn if too large)
+          BUILD_SIZE=$(du -sh ./out | cut -f1)
+          echo "📊 Build size: $BUILD_SIZE"
+          
+          # List build contents for debugging
+          echo "📁 Build output contents:"
+          ls -la ./out/
+          
+          echo "✅ Build verification completed successfully"
+
+      - name: Prepare deployment files
+        run: |
+          echo "📋 Preparing deployment files..."
+          
+          # Ensure .nojekyll exists for GitHub Pages
+          touch ./out/.nojekyll
+          echo "✅ Created .nojekyll file"
+
+          # Copy CNAME if it contains a domain (not just comments)
+          if [ -f "./public/CNAME" ] && grep -q '^[^#]' ./public/CNAME 2>/dev/null; then
+            cp ./public/CNAME ./out/CNAME
+            CUSTOM_DOMAIN=$(cat ./out/CNAME)
+            echo "✅ Custom domain configured: $CUSTOM_DOMAIN"
+          else
+            echo "ℹ️ No custom domain configured (using GitHub Pages default)"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+        timeout-minutes: 2
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        timeout-minutes: 5
+
+      - name: Verify deployment
+        if: success()
+        run: |
+          echo "🔍 Running comprehensive deployment verification..."
+          
+          # Set environment variables for verification script
+          export DEPLOYMENT_URL="${{ steps.deployment.outputs.page_url }}"
+          export GITHUB_REPOSITORY="${{ github.repository }}"
+          export GITHUB_REF_NAME="${{ github.ref_name }}"
+          export DEPLOYMENT_MODE="fast"
+          
+          # Run verification script
+          npm run deploy:verify
+          
+          echo ""
+          echo "✅ Fast deployment completed successfully!"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "⏱️ Deployment completed in fast mode"
+
+          # Check if custom domain is configured
+          if [ -f "./out/CNAME" ]; then
+            CUSTOM_DOMAIN=$(cat ./out/CNAME)
+            echo "🔗 Custom domain: https://$CUSTOM_DOMAIN"
+            echo "ℹ️ DNS propagation may take a few minutes"
+          fi
+
+          # Output deployment summary
+          echo "📊 Fast Deployment Summary:"
+          echo "- Repository: ${{ github.repository }}"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Commit: ${{ github.sha }}"
+          echo "- Workflow: Fast Deploy"
+          echo "- Mode: Production (Fast)"
+
+      - name: Upload verification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-verification-results
+          path: deployment-verification.json
+          retention-days: 30
+
+      - name: Final error handling and recovery
+        if: failure()
+        continue-on-error: true
+        run: |
+          echo "🚨 Deployment failed - running final error analysis..."
+          
+          # Generate comprehensive error report
+          node scripts/error-reporting.js health || echo "Health check failed"
+          
+          # Attempt last-resort emergency build
+          echo "🚑 Attempting last-resort emergency build..."
+          node scripts/build-fallback.js basic || echo "Emergency build failed"
+          
+          # Collect all available diagnostic information
+          echo ""
+          echo "📊 Final Diagnostic Information:"
+          echo "- Repository: ${{ github.repository }}"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Commit: ${{ github.sha }}"
+          echo "- Workflow: ${{ github.workflow }}"
+          echo "- Run ID: ${{ github.run_id }}"
+          echo "- Node.js: $(node --version)"
+          echo "- NPM: $(npm --version)"
+          echo "- Platform: $(uname -a)"
+          echo "- Working Directory: $(pwd)"
+          echo "- Directory Contents: $(ls -la)"
+          
+          if [ -d "./out" ]; then
+            echo "- Build Output: $(ls -la ./out/)"
+            echo "- Build Size: $(du -sh ./out/)"
+          else
+            echo "- Build Output: Not found"
+          fi
+          
+          # Generate GitHub Actions annotations with comprehensive troubleshooting
+          echo ""
+          echo "::error title=Deployment Failed::All deployment strategies failed including error recovery mechanisms"
+          echo "::notice title=Immediate Actions::1. Check GitHub Actions logs for specific errors 2. Verify GitHub Pages is enabled 3. Check repository permissions"
+          echo "::notice title=Build Recovery::1. Run 'npm run build:emergency' locally 2. Test build with 'npm run build:basic' 3. Check for recent breaking changes"
+          echo "::notice title=System Issues::1. Check Node.js version compatibility 2. Verify sufficient memory/disk space 3. Check network connectivity"
+          echo "::notice title=GitHub Pages::1. Verify Pages source is set to 'GitHub Actions' 2. Check custom domain DNS settings 3. Ensure workflow has proper permissions"
+          echo "::notice title=Emergency Deployment::1. Use manual deployment process 2. Revert to last working commit 3. Contact repository maintainers"
+          
+          # Save failure state for debugging
+          echo "DEPLOYMENT_FAILED=true" >> $GITHUB_ENV
+          echo "FAILURE_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV

@@ -4,8 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run build:og && next build",
+    "build": "node scripts/build-full.js",
+    "build:full": "node scripts/build-full.js",
+    "build:fast": "node scripts/build-fast.js",
+    "build:minimal": "node scripts/build-minimal.js",
+    "build:fallback": "node scripts/build-fallback.js",
+    "build:emergency": "node scripts/build-fallback.js emergency",
+    "build:basic": "node scripts/build-fallback.js basic",
     "build:og": "tsx src/scripts/build-og-images.ts",
+    "build:og:conditional": "node -e \"process.env.SKIP_OG_GENERATION !== 'true' && require('child_process').execSync('npm run build:og', {stdio: 'inherit'})\"",
+    "build:verify": "node scripts/verify-build-output.js",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -25,7 +33,13 @@
     "analyze": "npm run build && npm run lighthouse:desktop && npm run lighthouse:mobile",
     "validate-ci": "node scripts/validate-ci.js",
     "configure-deployment": "node scripts/configure-deployment.js",
-    "test-deployment": "node scripts/test-deployment.js"
+    "test-deployment": "node scripts/test-deployment.js",
+    "deploy:verify": "node scripts/verify-deployment.js",
+    "deploy:retry": "node scripts/deployment-retry.js",
+    "deploy:health": "node scripts/error-reporting.js health",
+    "deploy:error-test": "node scripts/error-reporting.js test",
+    "deploy:with-error-handling": "node scripts/deployment-error-handler.js complete",
+    "deploy:emergency": "node scripts/deployment-error-handler.js build emergency"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

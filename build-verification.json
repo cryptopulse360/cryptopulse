@@ -1,0 +1,83 @@
+{
+  "deploymentMode": "full",
+  "timestamp": "2025-10-11T14:30:41.253Z",
+  "checks": {
+    "essentialFiles": {
+      "success": false,
+      "results": [
+        {
+          "file": "index.html",
+          "exists": false
+        },
+        {
+          "file": "_next/static",
+          "exists": false
+        },
+        {
+          "file": "articles/index.html",
+          "exists": false
+        },
+        {
+          "file": "tags/index.html",
+          "exists": false
+        },
+        {
+          "file": "about/index.html",
+          "exists": false
+        },
+        {
+          "file": "sitemap.xml",
+          "exists": false
+        },
+        {
+          "file": "rss.xml",
+          "exists": false
+        }
+      ],
+      "missingFiles": [
+        "index.html",
+        "_next/static",
+        "articles/index.html",
+        "tags/index.html",
+        "about/index.html",
+        "sitemap.xml",
+        "rss.xml"
+      ]
+    },
+    "htmlValidation": {
+      "success": false,
+      "results": [
+        {
+          "file": "index.html",
+          "valid": false,
+          "error": "File not found"
+        },
+        {
+          "file": "articles/index.html",
+          "valid": false,
+          "error": "File not found"
+        },
+        {
+          "file": "tags/index.html",
+          "valid": false,
+          "error": "File not found"
+        },
+        {
+          "file": "about/index.html",
+          "valid": false,
+          "error": "File not found"
+        }
+      ]
+    },
+    "staticAssets": {
+      "success": false,
+      "error": "Static directory missing"
+    },
+    "buildMetrics": {
+      "success": true,
+      "buildSize": 59267963,
+      "buildSizeMB": 56.52,
+      "threshold": 200
+    }
+  }
+}
